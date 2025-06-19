@@ -62,5 +62,4 @@ def gen_depth_frames():
 
 # Register subscribers once
 def init_camera_streams():
-    rospy.Subscriber('/camera/color/image_raw', Image, rgb_callback, queue_size=1, buff_size=2**20)
     rospy.Subscriber('/camera/depth_overlay/image_raw', Image, depth_callback, queue_size=1, buff_size=2**20)

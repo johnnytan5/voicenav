@@ -130,13 +130,11 @@ class DepthOverlay:
                     if obstacle_detected:
                         break
 
-                cv2.imshow("Overlay: RGB + Depth Segments", blended)
                 if cv2.waitKey(1) == 27:
                     break
 
             rate.sleep()
 
-        cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     try:

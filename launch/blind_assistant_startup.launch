@@ -1,0 +1,25 @@
+<launch>
+  <!-- Ensure roscore is up -->
+  <node pkg="roscore" type="roscore" name="roscore" required="true" />
+
+  <!-- Audio input node -->
+  <node pkg="blindassistant" type="audio-in.py" name="audio_in" output="screen" />
+
+  <!-- TTS output -->
+  <node pkg="blindassistant" type="text-to-speech-output.py" name="tts_output" output="screen" />
+
+  <!-- Voice logic client -->
+  <node pkg="blindassistant" type="vl_client.py" name="vl_client" output="screen" />
+
+  <!-- Astra camera launch -->
+  <include file="$(find astra_camera)/launch/astra.launch" />
+
+  <!-- Camera processing nodes -->
+  <node pkg="blindassistant" type="camera.py" name="camera" output="screen" />
+  <node pkg="blindassistant" type="camera_x_delay.py" name="camera_x_delay" output="screen" />
+  <!-- Feature Extraction Node -->
+  <node pkg="blindassistant" type="extraction.py" name="extraction" output="screen" />
+
+  <!-- Web server -->
+  <node pkg="blindassistant" type="web_server.py" name="web_server" output="screen" />
+</launch>

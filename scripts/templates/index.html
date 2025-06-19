@@ -13,31 +13,76 @@
       color: #0ff;
     }
 
-
     h1 {
       text-align: center;
       color: #0ff;
       text-shadow: 0 0 5px #0ff;
     }
 
-
-    .row {
+    .main-layout {
       display: flex;
-      justify-content: space-around;
+      height: calc(100vh - 80px);
       padding: 10px;
+      gap: 10px;
     }
+
+    .left-column {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+.right-column {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden; /* container won't scroll, but children can */
+}
+
+.tabs {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid #0ff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #0ff;
+  padding: 10px;
+  overflow: hidden; /* same here: keep internal layout tidy */
+}
+
+#tabs {
+  flex-grow: 1;
+  overflow-y: auto;  /* <-- enable scrolling inside the log tabs */
+}
+
+/* optional: limit the height of each tab */
+.tab {
+  height: 100%;
+  display: none;
+}
+
+.tab.active {
+  display: block;
+  height: 100%;
+}
+
+.tab pre {
+  height: 100%;
+  overflow-y: auto;
+  margin: 0;
+}
 
 
     .camera-frame {
       border: 1px solid #0ff;
-      width: 100%;
-      height: 45%;
       background: rgba(0, 255, 255, 0.05);
       box-shadow: 0 0 10px #0ff;
       border-radius: 10px;
       overflow: hidden;
     }
-
 
     .camera-frame h3 {
       text-align: center;
@@ -47,85 +92,20 @@
       color: #0ff;
     }
 
-
     .camera-frame img {
       width: 100%;
       height: auto;
       display: block;
     }
 
-
-    .logs-section {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-    }
-
-
-    .tabs {
-      width: 74%;
-      background: rgba(0, 255, 255, 0.05);
-      border: 1px solid #0ff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #0ff;
-      padding: 10px;
-    }
-
-
-    .tab-buttons button {
-      margin-right: 5px;
-      padding: 5px 10px;
-      background: rgba(0, 255, 255, 0.2);
-      color: #0ff;
-      border: 1px solid #0ff;
-      border-radius: 5px;
-      cursor: pointer;
-      font-family: 'Orbitron', sans-serif;
-      text-shadow: 0 0 3px #0ff;
-    }
-
-
-    .tab-buttons button:hover {
-      background: rgba(0, 255, 255, 0.4);
-    }
-
-
-    .tab {
-      display: none;
-      margin-top: 10px;
-    }
-
-
-    .tab.active {
-      display: block;
-    }
-
-
-    pre {
-      background: rgba(0, 255, 255, 0.05);
-      border: 1px solid #0ff;
-      color: #0ff;
-      padding: 10px;
-      height: 200px;
-      overflow-y: auto;
-      font-family: monospace;
-      text-shadow: 0 0 2px #0ff;
-    }
-
-
     .walkie-talkie {
-      width: 23%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 255, 255, 0.05);
       padding: 20px;
       border: 1px solid #0ff;
       border-radius: 15px;
       box-shadow: 0 0 15px #0ff;
+      background: rgba(0, 255, 255, 0.05);
+      text-align: center;
     }
-
 
     .walkie-talkie button {
       width: 100%;
@@ -142,56 +122,76 @@
       cursor: pointer;
     }
 
-
     .walkie-talkie button:hover {
       background: rgba(0, 255, 255, 0.3);
     }
 
-
     .mic-icon {
       font-size: 40px;
-      margin: 15px;
       color: #0ff;
       text-shadow: 0 0 5px #0ff;
+    }
+
+
+    .tab-buttons {
+      margin-bottom: 10px;
+    }
+
+    .tab-buttons button {
+      margin-right: 5px;
+      padding: 5px 10px;
+      background: rgba(0, 255, 255, 0.2);
+      color: #0ff;
+      border: 1px solid #0ff;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 3px #0ff;
+    }
+
+    .tab-buttons button:hover {
+      background: rgba(0, 255, 255, 0.4);
+    }
+
+
+    pre {
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid #0ff;
+      color: #0ff;
+      padding: 10px;
+      height: 100%;
+      overflow-y: auto;
+      font-family: monospace;
+      text-shadow: 0 0 2px #0ff;
     }
   </style>
 </head>
 <body>
 
-
 <h1>Blind Assistant Interface</h1>
 
-
-<!-- Video Feeds -->
-<div class="row">
-  <div class="camera-frame">
-    <h3>RGB Camera</h3>
-    <img src="/video_feed" alt="Camera Feed">
-  </div>
-  <div class="camera-frame">
-    <h3>Depth Overlay</h3>
-    <img src="/depth_feed" alt="Depth Feed">
-  </div>
-</div>
-
-
-<!-- Logs and Controls -->
-<div class="logs-section">
-  <!-- ROS Log Tabs -->
-  <div class="tabs">
-    <div class="tab-buttons" id="tab-buttons"></div>
-    <div id="tabs"></div>
+<div class="main-layout">
+  <!-- Left column -->
+  <div class="left-column">
+    <div class="camera-frame">
+      <h3>Depth Overlay</h3>
+      <img src="/depth_feed" alt="Depth Feed">
+    </div>
+    <div class="walkie-talkie">
+      <div class="mic-icon" id="mic-icon">🎤</div>
+      <button id="talk-btn" onmousedown="startTalk()" onmouseup="stopTalk()">Push to Talk</button>
+      <button id="listen-btn" onclick="toggleListen()">🔊 Listen: ON</button>
+    </div>
   </div>
 
-
-  <!-- Push to Talk -->
-  <div class="walkie-talkie">
-    <div class="mic-icon" id="mic-icon">🎤</div>
-    <button id="talk-btn" onmousedown="startTalk()" onmouseup="stopTalk()">Push to Talk</button>
-    <button id="listen-btn" onclick="toggleListen()">🔊 Listen: ON</button>
+  <!-- Right column -->
+  <div class="right-column">
+    <div class="tabs">
+      <div class="tab-buttons" id="tab-buttons"></div>
+      <div id="tabs" style="flex-grow:1;"></div>
+    </div>
   </div>
 </div>
-
 
 <script>
   const socket = io();
@@ -201,18 +201,15 @@
   let mediaRecorder = null;
   let audioStream = null;
 
-
   function switchTab(tabName) {
     if (currentTab) document.getElementById(`tab-${currentTab}`).classList.remove('active');
     document.getElementById(`tab-${tabName}`).classList.add('active');
     currentTab = tabName;
   }
 
-
   socket.on('ros_log', (data) => {
     const node = data.node;
     const message = `[${new Date(data.timestamp * 1000).toLocaleTimeString()}] ${data.msg}\n`;
-
 
     if (!tabs[node]) {
       tabs[node] = true;
@@ -222,32 +219,26 @@
       pre.textContent = '';
       document.getElementById('tabs').appendChild(pre);
 
-
       const btn = document.createElement('button');
       btn.innerText = node;
       btn.onclick = () => switchTab(node);
       document.getElementById('tab-buttons').appendChild(btn);
 
-
       switchTab(node);
     }
 
-
     const pre = document.getElementById(`tab-${node}`);
-    pre.textContent += message;
+    pre.textContent = message + pre.textContent;
     pre.scrollTop = pre.scrollHeight;
   });
-
 
   async function startTalk() {
     document.getElementById('mic-icon').innerText = '🎙️';
     document.getElementById('listen-btn').disabled = true;
     listening = false;
 
-
     audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorder = new MediaRecorder(audioStream);
-
 
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
@@ -255,10 +246,8 @@
       }
     };
 
-
     mediaRecorder.start(250);
   }
-
 
   function stopTalk() {
     document.getElementById('mic-icon').innerText = '🎤';
@@ -272,7 +261,6 @@
     }
   }
 
-
   function toggleListen() {
     listening = !listening;
     document.getElementById('listen-btn').innerText = listening ? '🔊 Listen: ON' : '🔇 Listen: OFF';
@@ -280,11 +268,5 @@
   }
 </script>
 
-
 </body>
 </html>
-
-
-
-
-
