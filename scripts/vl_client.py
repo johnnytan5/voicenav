@@ -51,17 +51,24 @@ class VLClient:
         self.check_trigger()
 
     def check_trigger(self):
+        # Avoid race condition
+        if self.has_processed:
+            return
+
         rospy.loginfo(f"Checking criteria, /Command: {self.latest_command}, /Mode: {self.latest_mode}, /isProcessing: {self.has_processed}")
-        if self.latest_command == "scan" and self.latest_mode == "walking" and not self.has_processed:
+        if self.latest_command == "snap" and self.latest_mode == "walking":
             rospy.loginfo("✅ Trigger condition met: scanning while walking.")
-            self.has_processed = True
+            self.has_processed = True  # lock immediately
             if self.latest_image is not None:
                 self.send_to_openai(self.latest_image)
             else:
                 rospy.logwarn("⚠️ No image available yet. Will process next image.")
 
     def image_callback(self, msg):
-        if not self.has_processed and self.latest_command == "scan" and self.latest_mode == "walking":
+        if self.has_processed:
+            return
+
+        if self.latest_command == "snap" and self.latest_mode == "walking":
             try:
                 cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
                 self.latest_image = cv_image
@@ -95,7 +102,7 @@ class VLClient:
                         "role": "user",
                         "content": [
                             {"type": "image_url", "image_url": {"url": image_url}},
-                            {"type": "text", "text": "Imagine this is a camera held by a visually impaired individual. Describe the environment and guide them. Be informative but concise."}
+                            {"type": "text", "text": "Imagine this is a camera held by a visually impaired individual. Describe the environment and guide them. Be informative but concise. Maximum response: 2 sentences with max 15 words."}
                         ]
                     }
                 ],
@@ -109,13 +116,17 @@ class VLClient:
             rospy.loginfo(f"🧠 OpenAI GPT-4o response:\n{message}")
             self.tts_pub.publish(message)
 
-            
         except Exception as e:
             rospy.logerr(f"❌ Failed to call OpenAI API: {e}")
 
-        # Reset trigger so you can say scan again later
+        # Reset using timer
+        rospy.Timer(rospy.Duration(1.0), self.reset_flags, oneshot=True)
+
+    def reset_flags(self, event):
         self.latest_command = ""
         self.has_processed = False
+        rospy.loginfo("🔁 Trigger reset. Ready for next command.")
+
 
 if __name__ == "__main__":
     try:

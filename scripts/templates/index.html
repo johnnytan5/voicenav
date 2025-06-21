@@ -193,80 +193,9 @@
   </div>
 </div>
 
-<script>
-  const socket = io();
-  const tabs = {};
-  let currentTab = null;
-  let listening = true;
-  let mediaRecorder = null;
-  let audioStream = null;
 
-  function switchTab(tabName) {
-    if (currentTab) document.getElementById(`tab-${currentTab}`).classList.remove('active');
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-    currentTab = tabName;
-  }
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
 
-  socket.on('ros_log', (data) => {
-    const node = data.node;
-    const message = `[${new Date(data.timestamp * 1000).toLocaleTimeString()}] ${data.msg}\n`;
-
-    if (!tabs[node]) {
-      tabs[node] = true;
-      const pre = document.createElement('pre');
-      pre.id = `tab-${node}`;
-      pre.className = 'tab';
-      pre.textContent = '';
-      document.getElementById('tabs').appendChild(pre);
-
-      const btn = document.createElement('button');
-      btn.innerText = node;
-      btn.onclick = () => switchTab(node);
-      document.getElementById('tab-buttons').appendChild(btn);
-
-      switchTab(node);
-    }
-
-    const pre = document.getElementById(`tab-${node}`);
-    pre.textContent = message + pre.textContent;
-    pre.scrollTop = pre.scrollHeight;
-  });
-
-  async function startTalk() {
-    document.getElementById('mic-icon').innerText = '🎙️';
-    document.getElementById('listen-btn').disabled = true;
-    listening = false;
-
-    audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(audioStream);
-
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) {
-        socket.emit('audio_chunk', e.data);
-      }
-    };
-
-    mediaRecorder.start(250);
-  }
-
-  function stopTalk() {
-    document.getElementById('mic-icon').innerText = '🎤';
-    document.getElementById('listen-btn').disabled = false;
-    listening = true;
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-    }
-    if (audioStream) {
-      audioStream.getTracks().forEach(track => track.stop());
-    }
-  }
-
-  function toggleListen() {
-    listening = !listening;
-    document.getElementById('listen-btn').innerText = listening ? '🔊 Listen: ON' : '🔇 Listen: OFF';
-    socket.emit('toggle_listen', listening);
-  }
-</script>
 
 </body>
 </html>

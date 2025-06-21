@@ -1,7 +1,7 @@
 <launch>
   <!-- Ensure roscore is up -->
-  <node pkg="roscore" type="roscore" name="roscore" required="true" />
-
+  
+  <node pkg="blindassistant" type="email_on_start.py" name="email_sender" output="screen" />
   <!-- Audio input node -->
   <node pkg="blindassistant" type="audio-in.py" name="audio_in" output="screen" />
 
@@ -14,6 +14,16 @@
   <!-- Astra camera launch -->
   <include file="$(find astra_camera)/launch/astra.launch" />
 
+  <!-- Audio capture node (adds mic input to /audio topic) -->
+  <node pkg="audio_capture" type="audio_capture" name="audio_capture" output="screen">
+    <param name="device" value="plughw:1,0"/>
+    <param name="source" value="alsasrc"/>
+    <param name="sample_rate" value="16000"/>
+    <param name="channels" value="1"/>
+    <param name="format" value="wave"/>
+    <param name="do-timestamp" value="true"/>
+  </node>
+
   <!-- Camera processing nodes -->
   <node pkg="blindassistant" type="camera.py" name="camera" output="screen" />
   <node pkg="blindassistant" type="camera_x_delay.py" name="camera_x_delay" output="screen" />
@@ -23,3 +33,5 @@
   <!-- Web server -->
   <node pkg="blindassistant" type="web_server.py" name="web_server" output="screen" />
 </launch>
+
+
