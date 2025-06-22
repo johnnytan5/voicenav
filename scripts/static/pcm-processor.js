@@ -2,7 +2,7 @@ class PCMResamplerProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
     this.inBuffer = new Int16Array(0);
-    this.inIndex  = 0;       // where we’ve read up to inBuffer
+    this.inIndex  = 0;      
     this.outBuffer = [];
     this.port.onmessage = (event) => {
       const chunk = new Int16Array(event.data);
@@ -15,17 +15,17 @@ class PCMResamplerProcessor extends AudioWorkletProcessor {
 
     // calculate the ratio once
     this.inputRate  = 16000;
-    this.outputRate = sampleRate;            // AudioContext.sampleRate
+    this.outputRate = sampleRate;            
     this.ratio      = this.inputRate / this.outputRate;
     this.started    = false;
   }
 
   process(inputs, outputs) {
-    const out = outputs[0][0]; // mono float32
+    const out = outputs[0][0]; 
     const needed = out.length;
 
     // Jitter buffer: wait until we have at least N ms of data
-    const minSamples = this.outputRate * 0.001; // e.g. 100ms
+    const minSamples = this.outputRate * 0.001; 
     if (!this.started) {
       const availableSrcSamples = this.inBuffer.length - this.inIndex;
       const availableOut = availableSrcSamples / this.ratio;

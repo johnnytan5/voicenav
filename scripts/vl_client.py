@@ -9,6 +9,7 @@ import os
 import cv2
 import base64
 import requests
+from playsound import playsound
 
 class VLClient:
     def __init__(self):
@@ -82,6 +83,7 @@ class VLClient:
                 pass  
 
     def send_to_openai(self, cv_image):
+        playsound(os.path.join(os.path.dirname(__file__), 'static', 'kacak.mp3'), block=False)
         try:
             _, buffer = cv2.imencode('.png', cv_image)
             image_base64 = base64.b64encode(buffer).decode('utf-8')
