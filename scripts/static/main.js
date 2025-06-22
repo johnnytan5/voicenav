@@ -127,12 +127,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Listen toggle logic
-function toggleListen() {
+async function toggleListen() {
   listening = !listening;
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume();
+  }
+
   document.getElementById('listen-btn').innerText = listening ? '🔊 Listen: ON' : '🔇 Listen: OFF';
   if (socket) {
     socket.emit('toggle_listen', listening);
   }
+
 }
 function updateListenButton() {
   const btn = document.getElementById('listen-btn');

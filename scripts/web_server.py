@@ -150,6 +150,8 @@ def robot_mic_stream():
 # Increase buffer size and add timing control
 audio_buffer = queue.Queue(maxsize=50)  # Increased buffer size
 
+
+
 def playback_worker():
     try:
         with sd.OutputStream(
@@ -207,12 +209,14 @@ if __name__ == '__main__':
    # ROS log tab listener
    threading.Thread(target=ros_log_listener, daemon=True).start()
 
-   # Start looped playback of WAV file to browser
-   threading.Thread(target=robot_mic_stream, daemon=True).start()
-
 
    # Receive audio from browser and play via speaker
    threading.Thread(target=playback_worker, daemon=True).start()
+
+
+   # Start looped playback of WAV file to browser
+   threading.Thread(target=robot_mic_stream, daemon=True).start()
+
 
 
    # Start Flask server

@@ -60,7 +60,7 @@ def audio_callback(msg):
             if "mode" in text:
                 pub_sound.publish(f"Current Mode: {current_mode}")
                 rospy.loginfo("Current Mode updated to user.")
-                msg = ""
+                pub.publish("")
 
             
     else:

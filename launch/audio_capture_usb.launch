@@ -1,6 +1,6 @@
 <launch>
   <node pkg="audio_capture" type="audio_capture" name="audio_capture" output="screen">
-    <param name="device" value="plughw:1,0"/>
+    <param name="device" value="plughw:2,0"/>
     <param name="source" value="alsasrc"/>
     <param name="sample_rate" value="16000"/>
     <param name="channels" value="1"/>
