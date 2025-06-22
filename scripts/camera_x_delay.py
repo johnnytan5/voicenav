@@ -5,7 +5,6 @@ import numpy as np
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
-
 class DepthOverlay:
     def __init__(self):
         self.bridge = CvBridge()
@@ -26,7 +25,7 @@ class DepthOverlay:
     def depth_callback(self, msg):
         depth_raw = self.bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
         if depth_raw.dtype == np.uint16:
-            self.depth_image = depth_raw.astype(np.float32) / 1000.0  # mm to meters
+            self.depth_image = depth_raw.astype(np.float32) / 1000.0
         else:
             self.depth_image = depth_raw
 
@@ -98,7 +97,6 @@ class DepthOverlay:
                     rospy.logerr(f"Failed to publish overlay image: {e}")
 
             rate.sleep()
-
 
 if __name__ == '__main__':
     rospy.init_node("depth_x_delay_overlay_node")

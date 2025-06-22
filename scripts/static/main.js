@@ -11,7 +11,7 @@ function prependLog(tabId, newText) {
     const pre = tab.querySelector('pre');
     if (pre) {
       pre.textContent = newText + "\n" + pre.textContent;
-      pre.scrollTop = 0; // scroll to top
+      pre.scrollTop = 0; 
     }
   }
 }
@@ -91,7 +91,7 @@ function stopTalk() {
 
       // Restore listen state if it was ON before
       if (!listening && wasListeningBeforeTalk) {
-        toggleListen();  // 🔁 turn it back on
+        toggleListen(); 
       }
     });
   };
@@ -133,7 +133,7 @@ async function toggleListen() {
     await audioContext.resume();
   }
 
-  document.getElementById('listen-btn').innerText = listening ? '🔊 Listen: ON' : '🔇 Listen: OFF';
+  document.getElementById('listen-btn').innerText = listening ? 'Listen: ON' : 'Listen: OFF';
   if (socket) {
     socket.emit('toggle_listen', listening);
   }
@@ -141,5 +141,5 @@ async function toggleListen() {
 }
 function updateListenButton() {
   const btn = document.getElementById('listen-btn');
-  btn.innerText = listening ? '🔊 Listen: ON' : '🔇 Listen: OFF';
+  btn.innerText = listening ? 'Listen: ON' : 'Listen: OFF';
 }

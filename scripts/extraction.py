@@ -33,16 +33,16 @@ class Extraction:
         # Publisher
         self.tts_pub = rospy.Publisher("robot_news_radio", String, queue_size=10)
 
-        rospy.loginfo("🟢 Extraction node is active. Waiting for /Command and /Mode...")
+        rospy.loginfo("Extraction node is active. Waiting for /Command and /Mode...")
 
     def command_callback(self, msg):
         self.latest_command = msg.data.strip().lower()
-        rospy.loginfo(f"📥 Received /Command: {self.latest_command}")
+        rospy.loginfo(f"Received /Command: {self.latest_command}")
         self.check_trigger()
 
     def mode_callback(self, msg):
         self.latest_mode = msg.data.strip().lower()
-        rospy.loginfo(f"📥 Received /Mode: {self.latest_mode}")
+        rospy.loginfo(f"Received /Mode: {self.latest_mode}")
         self.check_trigger()
 
     def check_trigger(self):
@@ -51,12 +51,12 @@ class Extraction:
 
         rospy.loginfo(f"Checking criteria, /Command: {self.latest_command}, /Mode: {self.latest_mode}, /isProcessing: {self.has_processed}")
         if self.latest_command == "snap" and self.latest_mode == "scanning":
-            rospy.loginfo("✅ Trigger condition met: scanning for extraction.")
+            rospy.loginfo("Trigger condition met: scanning for extraction.")
             self.has_processed = True
             if self.latest_image is not None:
                 self.send_to_openai(self.latest_image)
             else:
-                rospy.logwarn("⚠️ No image available yet. Will process next image.")
+                rospy.logwarn("No image available yet. Will process next image.")
 
     def image_callback(self, msg):
         if self.has_processed:
@@ -66,16 +66,16 @@ class Extraction:
             try:
                 cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
                 self.latest_image = cv_image
-                rospy.loginfo("📸 Captured image from camera.")
-                self.send_to_openai(cv_image)
+                rospy.loginfo("Captured image from camera.")
+                # self.send_to_openai(cv_image)
                 self.has_processed = True
             except Exception as e:
-                rospy.logerr(f"❌ Failed to convert image: {e}")
+                rospy.logerr(f"Failed to convert image: {e}")
         else:
             try:
                 self.latest_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
             except:
-                pass  # don't crash on occasional conversion errors
+                pass 
 
     def send_to_openai(self, cv_image):
         try:
@@ -106,11 +106,11 @@ class Extraction:
             response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
             result = response.json()
             message = result["choices"][0]["message"]["content"]
-            rospy.loginfo(f"🧠 OpenAI GPT-4o response:\n{message}")
+            rospy.loginfo(f"OpenAI GPT-4o response:\n{message}")
             self.tts_pub.publish(message)
 
         except Exception as e:
-            rospy.logerr(f"❌ Failed to call OpenAI API: {e}")
+            rospy.logerr(f"Failed to call OpenAI API: {e}")
 
         # Reset after a delay
         rospy.Timer(rospy.Duration(1.0), self.reset_flags, oneshot=True)
@@ -118,7 +118,7 @@ class Extraction:
     def reset_flags(self, event):
         self.latest_command = ""
         self.has_processed = False
-        rospy.loginfo("🔁 Trigger reset. Ready for next command.")
+        rospy.loginfo("Trigger reset. Ready for next command.")
 
 if __name__ == "__main__":
     try:

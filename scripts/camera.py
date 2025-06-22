@@ -25,7 +25,7 @@ class DepthOverlay:
 
         # Test the publisher once
         rospy.sleep(1.0)
-        self.tts_pub.publish("🔊 Depth overlay node started")
+        self.tts_pub.publish("Voice nav activated, web interface activated, please tell me the mode and command, i am delighted to assist you")
 
     def rgb_callback(self, msg):
         self.rgb_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
@@ -37,12 +37,12 @@ class DepthOverlay:
     def depth_callback(self, msg):
         depth_raw = self.bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
         if depth_raw.dtype == np.uint16:
-            self.depth_image = depth_raw.astype(np.float32) / 1000.0  # convert mm to meters
+            self.depth_image = depth_raw.astype(np.float32) / 1000.0
         else:
             self.depth_image = depth_raw
 
     def run(self):
-        rospy.loginfo("🟢 Running Depth Overlay...")
+        rospy.loginfo("Running Depth Overlay...")
         rate = rospy.Rate(0.2)
 
         while not rospy.is_shutdown():
@@ -117,11 +117,11 @@ class DepthOverlay:
 
                         if valid_depth.size > 0:
                             min_depth = np.min(valid_depth)
-                            rospy.loginfo(f"🔍 Zone [{i},{j}] '{directions[i*3 + j]}': min depth = {min_depth:.2f}m, count = {valid_depth.size}")
+                            rospy.loginfo(f"Zone [{i},{j}] '{directions[i*3 + j]}': min depth = {min_depth:.2f}m, count = {valid_depth.size}")
 
-                            if min_depth < 0.8 and self.latest_mode.lower() == "walking":  # ← Raise/lower threshold for testing
+                            if min_depth < 0.8 and self.latest_mode.lower() == "walking":  
                                 direction = directions[i * 3 + j]
-                                msg = f"⚠️ Obstacle detected in {direction}"
+                                msg = f"Obstacle detected in {direction}"
                                 rospy.logwarn(msg)
                                 self.tts_pub.publish(msg)
                                 cv2.putText(blended, msg, (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
@@ -134,7 +134,6 @@ class DepthOverlay:
                     break
 
             rate.sleep()
-
 
 if __name__ == '__main__':
     try:

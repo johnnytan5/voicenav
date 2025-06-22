@@ -10,8 +10,6 @@ import cv2
 import base64
 import requests
 
-
-
 class VLClient:
     def __init__(self):
         # Get path to .env.local in the parent directory
@@ -25,8 +23,8 @@ class VLClient:
         self.bridge = CvBridge()
         self.latest_command = ""
         self.latest_mode = ""
-        self.has_processed = False  # avoid multiple triggers
-        self.api_key = openai_key  # Keep this safe
+        self.has_processed = False
+        self.api_key = openai_key  
 
         # Subscribers
         self.command_sub = rospy.Subscriber("/Command", String, self.command_callback)
@@ -38,16 +36,16 @@ class VLClient:
 
         self.latest_image = None
 
-        rospy.loginfo("🟢 VLClient is running. Waiting for /Command and /Mode...")
+        rospy.loginfo("VLClient is running. Waiting for /Command and /Mode...")
 
     def command_callback(self, msg):
         self.latest_command = msg.data.strip().lower()
-        rospy.loginfo(f"📥 Received /Command: {self.latest_command}")
+        rospy.loginfo(f"Received /Command: {self.latest_command}")
         self.check_trigger()
 
     def mode_callback(self, msg):
         self.latest_mode = msg.data.strip().lower()
-        rospy.loginfo(f"📥 Received /Mode: {self.latest_mode}")
+        rospy.loginfo(f"Received /Mode: {self.latest_mode}")
         self.check_trigger()
 
     def check_trigger(self):
@@ -57,12 +55,12 @@ class VLClient:
 
         rospy.loginfo(f"Checking criteria, /Command: {self.latest_command}, /Mode: {self.latest_mode}, /isProcessing: {self.has_processed}")
         if self.latest_command == "snap" and self.latest_mode == "walking":
-            rospy.loginfo("✅ Trigger condition met: scanning while walking.")
-            self.has_processed = True  # lock immediately
+            rospy.loginfo("Trigger condition met: scanning while walking.")
+            self.has_processed = True
             if self.latest_image is not None:
                 self.send_to_openai(self.latest_image)
             else:
-                rospy.logwarn("⚠️ No image available yet. Will process next image.")
+                rospy.logwarn("No image available yet. Will process next image.")
 
     def image_callback(self, msg):
         if self.has_processed:
@@ -72,16 +70,16 @@ class VLClient:
             try:
                 cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
                 self.latest_image = cv_image
-                rospy.loginfo("📸 Captured image from camera.")
-                self.send_to_openai(cv_image)
+                rospy.loginfo("Captured image from camera.")
+                #self.send_to_openai(cv_image)
                 self.has_processed = True
             except Exception as e:
-                rospy.logerr(f"❌ Failed to convert image: {e}")
+                rospy.logerr(f"Failed to convert image: {e}")
         else:
             try:
                 self.latest_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
             except:
-                pass  # ignore non-process image updates
+                pass  
 
     def send_to_openai(self, cv_image):
         try:
@@ -113,11 +111,11 @@ class VLClient:
                                      headers=headers, json=payload)
             result = response.json()
             message = result["choices"][0]["message"]["content"]
-            rospy.loginfo(f"🧠 OpenAI GPT-4o response:\n{message}")
+            rospy.loginfo(f"OpenAI GPT-4o response:\n{message}")
             self.tts_pub.publish(message)
 
         except Exception as e:
-            rospy.logerr(f"❌ Failed to call OpenAI API: {e}")
+            rospy.logerr(f"Failed to call OpenAI API: {e}")
 
         # Reset using timer
         rospy.Timer(rospy.Duration(1.0), self.reset_flags, oneshot=True)
@@ -125,8 +123,7 @@ class VLClient:
     def reset_flags(self, event):
         self.latest_command = ""
         self.has_processed = False
-        rospy.loginfo("🔁 Trigger reset. Ready for next command.")
-
+        rospy.loginfo("Trigger reset. Ready for next command.")
 
 if __name__ == "__main__":
     try:

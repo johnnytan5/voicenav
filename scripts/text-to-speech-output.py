@@ -5,7 +5,6 @@ from std_msgs.msg import String
 from gtts import gTTS
 import pygame
 import threading
-import os
 
 current_audio_lock = threading.Lock()
 current_audio_channel = None
@@ -30,18 +29,18 @@ def callback_receive_radio_data(msg):
     global current_audio_channel
 
     text = msg.data
-    rospy.loginfo(f"🔊 Message received: {text}")
+    rospy.loginfo(f"Message received: {text}")
 
     with current_audio_lock:
         if pygame.mixer.get_init() and pygame.mixer.music.get_busy():
-            rospy.loginfo("⏹ Stopping current audio.")
-            pygame.mixer.music.stop()  # Interrupt playback
+            rospy.loginfo("Stopping current audio.")
+            pygame.mixer.music.stop() 
 
         threading.Thread(target=play_audio, args=(text,)).start()
 
 if __name__ == '__main__':
     rospy.init_node('smartphone')
-    rospy.loginfo("📱 Audio subscriber started.")
+    rospy.loginfo("Audio subscriber started.")
 
     sub = rospy.Subscriber("/robot_news_radio", String, callback_receive_radio_data)
 

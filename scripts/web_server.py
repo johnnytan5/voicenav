@@ -21,29 +21,18 @@ conf.get_default().auth_token = "2yiQ6hGsXRX0zPcbzjZw9twUDaL_3oDCjGudobXxPiVtPdw
 public_url = ngrok.connect(5000, domain="suitable-phoenix-suitable.ngrok-free.app")
 print(f" * Ngrok Tunnel: {public_url}")
 
-# ===============================
-# Audio Config
-# ===============================
 CHUNK = 1024
 RATE = 16000
 CHANNELS = 1
 audio_buffer = queue.Queue()
 listening = True
 
-
-# Flask setup
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
-
-# Suppress ALSA errors
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 
-
-# ===============================
-# Flask Routes
-# ===============================
 @app.route('/')
 def index():
    return render_template('index.html')
@@ -53,10 +42,6 @@ def index():
 def depth_feed():
    return Response(gen_depth_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
-# ===============================
-# ROS Log Handling
-# ===============================
 def ros_log_callback(msg):
    log_data = {
        'node': msg.name,
@@ -72,10 +57,6 @@ def ros_log_listener():
    init_camera_streams()
    rospy.spin()
 
-
-# ===============================
-# Audio Listeners
-# ===============================
 @socketio.on('audio_chunk')
 def handle_audio_chunk(data):
     rospy.loginfo(f"[Talk] Received {len(data)} bytes from browser")
@@ -89,7 +70,7 @@ def handle_audio_chunk(data):
             subprocess.run([
                 'ffmpeg', '-y', '-i', tmp.name,
                 '-f', 's16le', '-acodec', 'pcm_s16le',
-                '-ac', '1', '-ar', '16000',  # match ROS playback settings
+                '-ac', '1', '-ar', '16000',  
                 '/tmp/walkie.raw'
             ], check=True)
 
@@ -101,23 +82,16 @@ def handle_audio_chunk(data):
         except subprocess.CalledProcessError:
             rospy.logerr("[Talk] ffmpeg failed to decode audio")
 
-
-
 @socketio.on('toggle_listen')
 def handle_toggle_listen(state):
    global listening
    listening = bool(state)
    rospy.loginfo(f"[WebUI] Listening state set to: {listening}")
 
-# ===============================
-# Loop WAV file to browser
-# ===============================
 def to_wav_bytes(pcm_bytes):
-   # Optional: apply simple gain control here
    np_audio = np.frombuffer(pcm_bytes, dtype=np.int16)
 
-
-   # Normalize volume (experimental gain control)
+   # Normalize volume 
    volume_factor = 0.5  # Reduce if noisy, increase if too quiet (try 0.3 ~ 1.0)
    np_audio = (np_audio * volume_factor).astype(np.int16)
 
@@ -130,10 +104,6 @@ def to_wav_bytes(pcm_bytes):
        wf.writeframes(np_audio.tobytes())
    return buffer.getvalue()
 
-
-
-
-# Modify your audio_capture_callback to reduce processing
 def audio_capture_callback(msg):
 #    wav_bytes = to_wav_bytes(bytes(msg.data))
    socketio.emit('robot_audio', msg.data)
@@ -143,14 +113,7 @@ def robot_mic_stream():
    rospy.loginfo("[Mic] Subscribed to /audio")
    rospy.spin()
 
-
-# ===============================
-# Playback from browser to robot
-# ===============================
-# Increase buffer size and add timing control
-audio_buffer = queue.Queue(maxsize=50)  # Increased buffer size
-
-
+audio_buffer = queue.Queue(maxsize=50)  
 
 def playback_worker():
     try:
@@ -158,7 +121,7 @@ def playback_worker():
             channels=CHANNELS, 
             samplerate=RATE, 
             blocksize=CHUNK,
-            dtype='int16',               # 🔐 Ensure output expects int16
+            dtype='int16',               
             latency='high'
         ) as stream:
             rospy.loginfo("[Speaker] Playback started")
@@ -199,25 +162,17 @@ def playback_worker():
     except Exception as e:
         rospy.logerr(f"[Speaker] Stream failed: {e}")
         
-# ===============================
-# Main Entry Point
-# ===============================
 if __name__ == '__main__':
    rospy.init_node('web_ros_interface', anonymous=True)
-
 
    # ROS log tab listener
    threading.Thread(target=ros_log_listener, daemon=True).start()
 
-
    # Receive audio from browser and play via speaker
    threading.Thread(target=playback_worker, daemon=True).start()
 
-
    # Start looped playback of WAV file to browser
    threading.Thread(target=robot_mic_stream, daemon=True).start()
-
-
 
    # Start Flask server
    socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
