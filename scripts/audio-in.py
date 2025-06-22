@@ -4,29 +4,24 @@ import numpy as np
 from std_msgs.msg import String
 from audio_common_msgs.msg import AudioData
 from vosk import Model, KaldiRecognizer
-import wave
 import json
+import time
 
+last_mode_query_time = 0
 current_mode = ""
+last_published_mode = ""
 pub_mode = None
 pub_command = None
 pub_sound = None
 pub = None
 
 # Load Vosk model
-model = Model("/home/mustar/catkin_ws/src/blindassistant/src/vosk-model")  # Change to actual path
+model = Model("/home/mustar/catkin_ws/src/blindassistant/src/vosk-model")
 recognizer = KaldiRecognizer(model, 16000)
 
-def mode_timer_callback(event):
-    global current_mode
-    if current_mode:
-        pub_mode.publish(current_mode)
-        rospy.loginfo("Mode Node Re-published: %s", current_mode)
-
 def audio_callback(msg):
-    global current_mode
+    global current_mode, last_published_mode
 
-    # Convert AudioData msg to PCM bytes
     pcm_data = bytes(msg.data)
 
     if recognizer.AcceptWaveform(pcm_data):
@@ -36,18 +31,23 @@ def audio_callback(msg):
         if text:
             rospy.loginfo("You said: %s", text)
             pub.publish(text)
-            if "walking" in text:
+
+            if "walking" in text and current_mode != "walking":
                 current_mode = "walking"
                 rospy.loginfo("Mode set to walking")
 
-            if "scanning" in text:
+            if "scanning" in text and current_mode != "scanning":
                 current_mode = "scanning"
                 rospy.loginfo("Mode set to scanning")
 
             if "exit" in text:
                 current_mode = ""
                 rospy.loginfo("Exited mode; publishing empty")
-                pub_mode.publish("")
+
+            # Only publish if the mode has changed
+            if current_mode != last_published_mode:
+                pub_mode.publish(current_mode)
+                last_published_mode = current_mode
 
             if "snap" in text:
                 pub_command.publish("snap")
@@ -58,14 +58,9 @@ def audio_callback(msg):
                 rospy.loginfo("Command Published: email")
 
             if "mode" in text:
-                pub_sound.publish(f"Current Mode: {current_mode}")
+                pub_sound.publish(f"Current status: {current_mode or 'none'}")
                 rospy.loginfo("Current Mode updated to user.")
-                pub.publish("")
-
-            
-    else:
-        # Partial result (not used here)
-        pass
+                
 
 def main():
     global pub, pub_mode, pub_command, pub_sound
@@ -79,9 +74,6 @@ def main():
     rospy.Subscriber("/audio", AudioData, audio_callback)
 
     rospy.loginfo("Vosk speech recognizer node started, listening to /audio")
-
-    # Timer to re-publish current mode every 1s
-    rospy.Timer(rospy.Duration(1.0), mode_timer_callback)
 
     rospy.spin()
 
