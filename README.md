@@ -14,6 +14,7 @@ VoiceNav is a ROS- and Python-based voice-activated assistant designed to empowe
 -  **Speech Recognition** : Use local microphone to capture speech and process with SpeechRecognition Model
 -  **Text‑to‑Speech (TTS)** : Output voice from text using your system speaker
 -  **Obstacle Detection**: Detects obstacles and emits warning
+-  **Depth Camera Sensor**: Uses astra depth camera modules to detect depth information
 -  **Scene Descriptor**: Captures image, process and describe the scene
 -  **Information Extraction**: Helps visually impaired individuals extract expiry and nutrition information 
 -  **Flask Web Interface** : Stream video, 2-way audio communication and logs in real time
