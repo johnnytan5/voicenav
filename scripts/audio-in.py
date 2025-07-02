@@ -65,7 +65,7 @@ def audio_callback(msg):
 def main():
     global pub, pub_mode, pub_command, pub_sound
 
-    rospy.init_node('audio_in_vosk')
+    rospy.init_node('audio_in')
     pub = rospy.Publisher('/Input', String, queue_size=10)
     pub_mode = rospy.Publisher('/Mode', String, queue_size=10)
     pub_command = rospy.Publisher('/Command', String, queue_size=10)
