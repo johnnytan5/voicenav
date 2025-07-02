@@ -39,7 +39,7 @@ def callback_receive_radio_data(msg):
         threading.Thread(target=play_audio, args=(text,)).start()
 
 if __name__ == '__main__':
-    rospy.init_node('smartphone')
+    rospy.init_node('tts_output')
     rospy.loginfo("Audio subscriber started.")
 
     sub = rospy.Subscriber("/robot_news_radio", String, callback_receive_radio_data)
